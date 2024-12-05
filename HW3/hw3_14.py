@@ -44,22 +44,81 @@ def transform(sample_points):
 # find the linear regression in the new feature space
 # use Moore-Penrose to prevent singular matrix
 
+#def linear_regression(sample_points, labels):
+  #  X = np.array([[point[0],point[1],point[2],point[3],point[4],point[5]] for point in sample_points])
+   # Y = np.array(labels)
+    #w = np.dot(np.dot(np.linalg.inv(np.dot(X.T,X)),X.T),Y)
+    #return w
+
+ # find linear regression and get prediction
 def linear_regression(sample_points, labels):
-    X = np.array([[point[0],point[1],point[2],point[3],point[4],point[5]] for point in sample_points])
+    X = np.array([[1,point[0],point[1]] for point in sample_points])
     Y = np.array(labels)
     w = np.dot(np.dot(np.linalg.inv(np.dot(X.T,X)),X.T),Y)
     return w
+#def predict(w,sample_points):
+ #   predictions = []
+  #  for point in sample_points:
+   #     predictions.append(np.sign(np.dot(w,[1,point[0],point[1]])))
+    #return predictions   
 
-# run the experiment for 1000 times and calculate the average Eout
-# compare the result with hw3_13.py
 # g1(x1,x2) = -1 - 0.05x1 + 0.08x2 + 0.13x1x2 + 15x1^2 + 1.5x2^2
-# g2(x1,x2) = -1 - 1.5x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 15x2^2
+# g2(x1,x2) = -1 - 1.5x1 + 0.08x2 + 0.13x1x2 + 0.05x1^2 + 1.5x2^2
+# g3(x1,x2) = -1 - 0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 1.5x2^2
+# g4(x1,x2) = -1 - 0.05x1 + 0.08x2 + 0.13x1x2 + 1.5x1^2 + 15x2^2
+# g5(x1,x2) = -1 - 1.5x1 + 0.08x2 + 0.13x1x2 + 0.05x1^2 + 0.05x2^2
+# use above g to get the prediction result
+def g1(x1,x2):
+    return np.sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 1.5*x2**2)
 
+def g2(x1,x2):
+    return np.sign(-1 - 1.5*x1 + 0.08*x2 + 0.13*x1*x2 + 0.05*x1**2 + 1.5*x2**2)
+
+def g3(x1,x2):
+    return np.sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 1.5*x2**2)
+
+def g4(x1,x2):
+    return np.sign(-1 - 0.05*x1 + 0.08*x2 + 0.13*x1*x2 + 1.5*x1**2 + 15*x2**2)
+
+def g5(x1,x2):
+    return np.sign(-1 - 1.5*x1 + 0.08*x2 + 0.13*x1*x2 + 0.05*x1**2 + 0.05*x2**2)
+
+
+
+
+# get the prediction result of linear regression and g1-g5
+# calculate the agreement between g and h
+
+def agreement(w, g, sample_points):
+    count = 0
+    for i in range(len(sample_points)):
+        # get the prediction result of linear regression and g1-g5
+        linear_prediction = np.sign(np.dot(w, [1, sample_points[i][0], sample_points[i][1]]))
+        g_prediction = g(sample_points[i][0], sample_points[i][1])
+        
+        # calculate the agreement between g and h
+        if linear_prediction == g_prediction:
+            count += 1
+    
+    # calculate the agreement rate
+    return count / len(sample_points)
+
+    
+
+# calculate the agreement from g1 to g5
+# find the closest g to w
 
 if __name__ == '__main__':
     sample_points = generate_sample_points()
     labels = create_labels(sample_points)
     labels = flip_labels(labels)
-    transformed_points = transform(sample_points)
-    w = linear_regression(transformed_points,labels)
-    print(w)
+    w = linear_regression(sample_points,labels)
+    agreements = []
+    agreements.append(agreement(w,g1,sample_points))
+    agreements.append(agreement(w,g2,sample_points))
+    agreements.append(agreement(w,g3,sample_points))
+    agreements.append(agreement(w,g4,sample_points))
+    agreements.append(agreement(w,g5,sample_points))
+    print(max(agreements),agreements.index(max(agreements))+1)
+
+    # o.803 ,2 
