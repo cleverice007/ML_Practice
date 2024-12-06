@@ -121,4 +121,4 @@ if __name__ == '__main__':
     agreements.append(agreement(w,g5,sample_points))
     print(max(agreements),agreements.index(max(agreements))+1)
 
-    # o.803 ,2 
+    # 0.803 ,2 
