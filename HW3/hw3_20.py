@@ -24,20 +24,27 @@ def sigmoid(z):
 # update weights one sample at a time
 # formula of gradient: (sigmoid(w^T * x) - y) * x
 
-def update_weights(X, Y, learning_rate=0.001, num_epochs=2):
+def update_weights(X, Y, learning_rate=0.001, num_iterations=2000):
     # Initialize weights to zeros
     w = np.zeros(X.shape[1])
-    
-    # Perform stochastic gradient descent
-    # run iterations for num_epochs
-    for _ in range(num_epochs):
-        for i in range(len(Y)):
-            
-            gradient = (sigmoid(np.dot(X[i], w)) - Y[i]) * X[i]
-            # Update weights
-            w -= learning_rate * gradient
-    return w
+    size = X.shape[0]  # Number of samples
 
+    # Perform gradient descent
+    for _ in range(num_iterations):
+        nabla_err = np.zeros(X.shape[1])  # Initialize gradient accumulator to zeros
+
+        # Compute gradient by iterating over all samples
+        for i in range(size):
+            val1 = np.dot(X[i], w)  
+            val2 = -1 * Y[i] * val1  
+            val3 = 1 / (1 + np.exp(-1 * val2))  
+            val = val3 * (-1) * Y[i] * X[i]  
+            nabla_err = nabla_err + val 
+
+        nabla_Ein = nabla_err / size  
+        w = w - learning_rate * nabla_Ein 
+
+    return w
 # calculate mean 0/1 error
 
 def calculate_error(X, Y, w):
