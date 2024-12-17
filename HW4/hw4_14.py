@@ -47,6 +47,21 @@ def choose_lambda(X_train, Y_train, lambda_):
             best_lambda = l
     return best_lambda, best_ein
 
+# choosing lambda by calculation eout
+# train weights by using train data
+# get the best lambda by calculating eout
+
+def choose_lambda_eout(X_train, Y_train, X_test, Y_test, lambda_):
+    best_lambda = 0
+    best_eout = float('inf')
+    for l in lambda_:
+        w = regularized_linear_regression(X_train, Y_train, l)
+        eout = calculate_error(X_test, Y_test, w)
+        if eout < best_eout:
+            best_eout = eout
+            best_lambda = l
+            ein = calculate_error(X_train, Y_train, w)
+    return best_lambda, best_eout, ein
 
 
 # log10(lambda) = [2, 1, 0, -1, -2, -3, -4, -5, -6,-7,-8,-9,-10]
@@ -60,8 +75,12 @@ if __name__ == "__main__":
     X_test, Y_test = read_file(test_file)
 
     lambda_ = [10**i for i in range(2, -11, -1)]
-    best_lambda, best_ein = choose_lambda(X_train, Y_train, lambda_)
-    eout = calculate_error(X_test, Y_test, regularized_linear_regression(X_train, Y_train, best_lambda))
-    print("Best lambda: ", math.log10(best_lambda))
-    print("Ein: ", best_ein)
-    print("Eout: ", eout)
+    #best_lambda, best_ein = choose_lambda(X_train, Y_train, lambda_)
+    #eout = calculate_error(X_test, Y_test, regularized_linear_regression(X_train, Y_train, best_lambda))
+    #print("Best lambda: ", math.log10(best_lambda))
+    #print("Ein: ", best_ein)
+    #print("Eout: ", eout)
+    best_lambda_, best_eout,ein = choose_lambda_eout(X_train, Y_train, X_test, Y_test, lambda_)
+    print("Best lambda: ", math.log10(best_lambda_))
+    print("Ein: ", ein)
+    print("Eout: ", best_eout)
