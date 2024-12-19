@@ -82,3 +82,12 @@ if __name__ == '__main__':
     print('Best lambda:', best_lambda)
     print('Ecv:', best_ecv)
 
+    # q20 : using optimal lambda to calculate Ein,eout for the whole training data
+    # and the test data
+    w = regularized_linear_regression(X, Y, best_lambda)
+    test_file = "hw4_test.dat"
+    X_test, Y_test = read_file(test_file)
+    ein = calculate_error(X, Y, w)
+    eout = calculate_error(X_test, Y_test, w)
+    print('Ein:', ein)
+    print('Eout:', eout)
