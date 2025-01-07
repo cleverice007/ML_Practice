@@ -32,6 +32,8 @@ if __name__ == "__main__":
     C = 0.1
     gamma_list = [0.001,0.01,0.1,1,10]
     E_out = []
+    train_Y = convert_Y(train_Y, 0)
+    test_Y = convert_Y(test_Y, 0)
     for gamma in gamma_list:
         clf = svm.SVC(kernel='rbf', C=C, gamma=gamma)
         clf.fit(train_X, train_Y)
