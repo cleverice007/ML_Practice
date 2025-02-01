@@ -77,6 +77,24 @@ def adaboost(X, Y, T=300):
         G[t] = [feature, s, threshold]
     return G, alpha
 
+# based on alpha and G to predict the label
+# calculate the error rate
+def predict(X, Y, G, alpha):
+
+    N = X.shape[0]  
+    T = len(alpha)  # number of weak classifiers
+    predict = np.zeros(N) 
+
+    for t in range(T):
+        feature, s, threshold = G[t] 
+        feature = int(feature) # convert float to int
+        predict += alpha[t] * s * np.sign(X[:, feature] - threshold) 
+
+    predict = np.sign(predict)  
+    error = np.mean(predict != Y)  
+    return error
+
+
 
     # calculate ein(g1)
 
@@ -85,3 +103,10 @@ if __name__ == '__main__':
     train_X, train_Y = read_file(train_file)
     min_error, best_s, best_threshold, best_feature = decision_stump(train_X, train_Y, np.ones(train_X.shape[0]) / train_X.shape[0])
     print('Ein(g1):', min_error )
+
+    # calculate ein(G)
+
+    G, alpha = adaboost(train_X, train_Y)
+
+    ein_G = predict(train_X, train_Y, G, alpha)
+    print('Ein(G):', ein_G)    
