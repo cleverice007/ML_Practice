@@ -67,15 +67,17 @@ def adaboost(X, Y, T=300):
     M = X.shape[1]
     weight = np.ones(N) / N
     alpha = np.zeros(T)
+    err_list = np.zeros(T)
     G = np.zeros((T, 3))  
     for t in range(T):
         error, s, threshold, feature = decision_stump(X, Y, weight)
+        err_list[t] = error
         alpha[t] = 0.5 * np.log((1 - error) / error)
         predict = s * np.sign(X[:, feature] - threshold)
         weight = weight * np.exp(-alpha[t] * Y * predict)
         weight = weight / np.sum(weight)
         G[t] = [feature, s, threshold]
-    return G, alpha
+    return G, alpha, error
 
 # based on alpha and G to predict the label
 # calculate the error rate
@@ -106,7 +108,12 @@ if __name__ == '__main__':
 
     # calculate ein(G)
 
-    G, alpha = adaboost(train_X, train_Y)
+    G, alpha,error = adaboost(train_X, train_Y)
 
     ein_G = predict(train_X, train_Y, G, alpha)
     print('Ein(G):', ein_G)    
+
+    # find the min error rate
+
+    min_error = np.min(error)
+    print('min error rate:', min_error)
