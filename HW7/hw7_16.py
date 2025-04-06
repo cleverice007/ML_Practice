@@ -139,22 +139,66 @@ class CaRTree(object):
         return [self.get_val(x) for x in X]
 
 
+class RandomForest(object):
+    def __init__(self, n_trees, n_samples):
+        self.n_trees = n_trees
+        self.n_samples = n_samples
+        self.trees = []
+        self.predictions = np.array([])
+
+    def build_rf(self, X, Y):
+        for _ in range(self.n_trees):
+            idx = np.random.choice(len(X), self.n_samples)
+            tree = CaRTree()
+            tree.build_cart(X[idx], Y[idx])
+            self.trees.append(tree)
+
+    # predict the class of each sample
+    def predict_Gt(self, X):
+        predictions = np.array([tree.predict(X) for tree in self.trees[:]])
+        final_predictions = []
+        for i in range(predictions.shape[1]):
+            final_predictions.append(np.sign(np.sum(predictions[:, i])))
+        return np.array(final_predictions)
+
 
 if __name__ == "__main__":
-    # read train and test data
+    # read data
     train_X, train_Y = read_file('train.dat')
     test_X, test_Y = read_file('test.dat')
 
-    # build tree
-    cart = CaRTree()
-    cart.build_cart(train_X, train_Y)
+    num_trees = 300
+    num_samples = train_X.shape[0]
 
-    # predict ein and eout
-    ein = np.mean(cart.predict(train_X) != train_Y)
-    eout = np.mean(cart.predict(test_X) != test_Y)
+    # ========== Q16：100 次平均 Ein(gₜ) ==========
+    avg_ein_list = []
 
+    for i in range(100):
+        print(f"Running experiment {i+1}/100")
 
-    # print the result
-    print(f"Ein: {ein}")
-    print(f"Eout: {eout}")
+        rf = RandomForest(num_trees, num_samples)
+        rf.build_rf(train_X, train_Y)
 
+        ein_list = []
+        for tree in rf.trees:
+            y_pred = tree.predict(train_X)
+            ein = np.mean(np.array(y_pred) != np.array(train_Y))
+            ein_list.append(ein)
+
+        avg_ein = np.mean(ein_list)
+        avg_ein_list.append(avg_ein)
+
+    final_avg_ein = np.mean(avg_ein_list)
+    print(f"\nFinal average Ein(g_t) over 30000 trees: {final_avg_ein:.4f}")
+
+    # ========== Q17 Extension：整個森林投票 Ein(Gₜ) / Eout(Gₜ) ==========
+    rf = RandomForest(num_trees, num_samples)
+    rf.build_rf(train_X, train_Y)
+
+    y_train_pred = rf.predict_Gt(train_X)
+    Ein = np.mean(y_train_pred != train_Y)
+    print(f"[RF] Ein(Gₜ=300): {Ein:.4f}")
+
+    y_test_pred = rf.predict_Gt(test_X)
+    Eout = np.mean(y_test_pred != test_Y)
+    print(f"[RF] Eout(Gₜ=300): {Eout:.4f}")
